@@ -8,6 +8,7 @@ class SortLists
    float y2011;
    float y2012;
    float y2013;
+   float sum=0;
    
    SortLists(String[] data)
    {
@@ -19,5 +20,12 @@ class SortLists
        y2011=Float.parseFloat(data[5]);
        y2012=Float.parseFloat(data[6]);
        y2013=Float.parseFloat(data[7]);
+       
+       SumUp(y2007);
+   }
+   
+   void SumUp(float year)
+   {
+      sum+=year;
    }
 }
