@@ -6,9 +6,7 @@ void setup()
   
   loadData();
   sumYears();
-  float max=yearMaxSum();
-  drawAxis(max);
-  drawLineGraph();
+  sumCounty();
 }
 
 //This array list is of type SortLists which will be used to hold all my data
@@ -21,6 +19,45 @@ float maxY;
 
 float [] yearSums =new float[numYears];
 float[] countySums =new float[numCounties];
+int graph=1;
+
+void draw()
+{
+  
+  background(255,0,0);
+  if(keyPressed)
+  {
+     if(key=='1')
+     {
+        graph=1; 
+     }
+     if(key=='2')
+     {
+        graph=2; 
+     }
+  }
+  
+  if(graph==1)
+  {
+      float max=yearMaxSum(yearSums);
+      drawAxis(max);
+      drawLineGraph();
+      textAlign(CENTER,CENTER);
+      text("Number of Deaths in Maryland from 2007-2013",width/2,border*.5);
+  }
+  if(graph==2)
+  {
+    float max=yearMaxSum(countySums);
+    drawAxis(max);
+    drawBarChart();
+     textAlign(CENTER,CENTER);
+   text("Number of Deaths per County in Maryland from 2007-2013",width/2,border*.5);
+  }
+  //float max=yearMaxSum();
+  //drawAxis(max);
+  //drawBarChart();
+  //drawLineGraph();
+}
 
 
 //This method loads the data from the .csv file in the data folder and sorts it by encapsulating using a class called SortLists
@@ -63,15 +100,23 @@ void sumYears()
 //This method sums up all the values for each county
 void sumCounty()
 {
-   
+   for(int i=0;i<dlist.size();i++)
+   {
+      countySums[i]+=dlist.get(i).y2007;
+      countySums[i]+=dlist.get(i).y2008;
+      countySums[i]+=dlist.get(i).y2009;
+      countySums[i]+=dlist.get(i).y2010;
+      countySums[i]+=dlist.get(i).y2011;
+      countySums[i]+=dlist.get(i).y2012;
+      countySums[i]+=dlist.get(i).y2013;
+   }
 }
 
+//This method draws the axises
 void drawAxis(float max)
 {
   
    float windowsp=width-border*2;
-   textAlign(CENTER,CENTER);
-   text("Number of Deaths in Maryland from 2007-2013",width/2,border*.5);
    
     //y-axis
     line(border,border,border,height-border);
@@ -96,15 +141,19 @@ void drawAxis(float max)
     
     float xGap=windowsp/(yearSums.length-1);
     
-    for(int i=0;i<=yearSums.length;i++)
+    if(graph==1)
     {
-       text((int)map(i,0,yearSums.length-1,2007,2013),(i*xGap)+border,height-(border*.5));
-       
-       //ticks for x-axis
-       line((i*xGap)+border,height-border,(i*xGap)+border,height-(border*.75));
+      for(int i=0;i<=yearSums.length;i++)
+      {
+         text((int)map(i,0,yearSums.length-1,2007,2013),(i*xGap)+border,height-(border*.5));
+         
+         //ticks for x-axis
+         line((i*xGap)+border,height-border,(i*xGap)+border,height-(border*.75));
+      }
     }
 }
 
+//This method finds what the max value to map the y values of the line graph to. This is used to make the y-axis look nicer.
 float findMaxWindow(float max)
 {
    while(max%10!=0)
@@ -115,16 +164,17 @@ float findMaxWindow(float max)
     return max;
 }
 
-float yearMaxSum()
+//Finds the max value in the yearSums array.
+float yearMaxSum(float [] Sums)
 {
    
-   float max=yearSums[0];
+   float max=Sums[0];
    
-   for(int i=1;i<yearSums.length;i++)
+   for(int i=1;i<Sums.length;i++)
    {
-     if(max<yearSums[i])
+     if(max<Sums[i])
     {
-       max=yearSums[i];
+       max=Sums[i];
     } 
    }
    
@@ -148,5 +198,20 @@ void drawLineGraph()
     line((px)+border,(height-py)-border,(x)+border,(height-y)-border);
   }
   
+}
+
+//This method draws a barchart to represent the sum of deaths over the seven years per county
+void drawBarChart()
+{
+    float windowsp=width-(border*2);
+    float bWidth=windowsp/dlist.size();
+    
+   for(int i=0;i<dlist.size();i++)
+   {
+     float x=(bWidth*i)+border;
+     float y=height-border;
+     
+     rect(x,y,bWidth,-map(countySums[i],0,maxY,0,windowsp));
+   } 
 }
 
