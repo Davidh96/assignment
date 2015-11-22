@@ -1,9 +1,12 @@
+//This program displays the deaths due to alcohol and drugs in Maryland between 2007-2013. The data is displayed using a linegraph and a barchart.
+//David Hunt
 void setup()
 {
   size(500,500); 
-  
+ 
   border=width*.1;
   
+  //calling my methods
   loadData();
   sumYears();
   sumCounty();
@@ -15,6 +18,7 @@ ArrayList<SortLists> dlist =new ArrayList<SortLists>();
 float border;
 int numYears=7;
 int numCounties=24;
+//maxY is used to round of the top value on the y axis to the nearest 10.
 float maxY;
 
 float [] yearSums =new float[numYears];
@@ -25,38 +29,48 @@ void draw()
 {
   
   background(255,0,0);
+  stroke(0);
+  
+  //Used so the user can change between graphs
   if(keyPressed)
   {
      if(key=='1')
      {
+       //line graph
         graph=1; 
      }
      if(key=='2')
      {
+       //barchart
         graph=2; 
      }
   }
   
+  //if linegraph
   if(graph==1)
   {
+      //get max for each year
       float max=yearMaxSum(yearSums);
+      float avg=lineGraphAvg();
       drawAxis(max);
-      drawLineGraph();
+      drawLineGraph(avg);
+      getdets(max,yearSums);
       textAlign(CENTER,CENTER);
-      text("Number of Deaths in Maryland from 2007-2013",width/2,border*.5);
+      text("Drug & Alcohol related Deaths Each Year in Maryland (2007-2013)",width/2,border*.5);
   }
+  
+  //if barchart
   if(graph==2)
   {
+    //get max for each county
     float max=yearMaxSum(countySums);
     drawAxis(max);
     drawBarChart();
-     textAlign(CENTER,CENTER);
-   text("Number of Deaths per County in Maryland from 2007-2013",width/2,border*.5);
+    getdets(max,countySums);
+    textAlign(CENTER,CENTER);
+    text("Drug & Alcohol related Deaths per County in Maryland (2007-2013)",width/2,border*.5);
   }
-  //float max=yearMaxSum();
-  //drawAxis(max);
-  //drawBarChart();
-  //drawLineGraph();
+ 
 }
 
 
@@ -71,7 +85,6 @@ void loadData()
      //Split the string where a "," is found
       String[] data=lines[i].split(",");
       
-      //sumCounty(data);
       
       //Creates a SortList called perCounty. My data will be passed to the method SortLists and sort it for later use and place it in perCounty
       SortLists perCounty= new SortLists(data);
@@ -121,13 +134,16 @@ void drawAxis(float max)
     //y-axis
     line(border,border,border,height-border);
     
+    //Round the max value to the nearest 10
     maxY=findMaxWindow(max);
     
+    //NumyVal is the amount of ticks I want on the y-axis. I chose 10
     int NumyVal=10;
     float yGap=windowsp/NumyVal;
     
     for(int i=0;i<=NumyVal;i++)
     {
+        //The y values that are beside the ticks 
         text((int)map(i,0,NumyVal,0,maxY),border*.5,height-(yGap*i)-border);
         
         //ticks for y-axis
@@ -145,6 +161,7 @@ void drawAxis(float max)
     {
       for(int i=0;i<=yearSums.length;i++)
       {
+         //The x values that are below the ticks
          text((int)map(i,0,yearSums.length-1,2007,2013),(i*xGap)+border,height-(border*.5));
          
          //ticks for x-axis
@@ -183,35 +200,112 @@ float yearMaxSum(float [] Sums)
 }
 
 //This method draws the line graph which represents the the sum of deaths per year
-void drawLineGraph()
+void drawLineGraph(float avg)
 {
-   
-  float windowsp=width-border*2;
+  //windowsp is the actual amount of space I can use for my graph in the x and y directions
+  float windowsp=width-(border*2);
   
   for(int i=1;i<yearSums.length;i++)
   {
+    //the previous x and y are mapped aswell as the x and y values. This will help fit the data into my graph
     float px=map(i-1,0,numYears,0,windowsp+border);
     float py=map(yearSums[i-1],0,maxY,0,windowsp);
     float x=map(i,0,numYears,0,windowsp+border);
     float y=map(yearSums[i],0,maxY,0,windowsp);
     
-    line((px)+border,(height-py)-border,(x)+border,(height-y)-border);
-  }
-  
+    //draws the trend between current and previous points
+    line((px)+border,(height-py)-border,x+border,(height-y)-border);
+    
+    //I draw circles at each point to make it easier to see the various points in the line graph
+    ellipse((px)+border,(height-py)-border,10,10);
+    
+    if(i==yearSums.length-1)
+    {
+       ellipse((x)+border,(height-y)-border,10,10);
+    }
+
+  }  
+ 
+  //draw the average line
+  stroke(0,255,0);
+  float avgline=map(avg,0,maxY,0,windowsp);
+  line(border,(height-avgline)-border,width-border,(height-avgline)-border);
+  textAlign(CENTER,CENTER);
+  text("Avg:\n" + (int)avg,width-(border*.5),(height-avgline)-border);
+
 }
+
+//This methd displays details to the user
+void getdets(float max,float[] array)
+{
+  //windowsp is the actual amount of space I can use for my graph in the x and y directions
+  float windowsp=width-(border*2);
+  float xGap=windowsp/array.length;
+  //space is used so the user can see the details displayed 15 pixels away from the mouse pointer
+  int space=15;
+  
+  
+  //if the x value of the mouse position is within the graph
+  if(mouseX>border && mouseX<width-border)
+  {
+     //mouseXpos is used to decide which value from yearSums to display
+    float mouseXpos=(mouseX-border)/xGap;
+    float y=(height-map(array[(int)mouseXpos],0,max,0,windowsp))-border; 
+    float x=map((int)mouseXpos,0,array.length,0,windowsp+border);
+    
+    //if user is viewing the line graph
+    if(graph==1)
+    {
+    text((int)(array[(int)mouseXpos])+" died",border+x,y-space);
+    line(x+border,y,mouseX,mouseY);
+    }
+    
+    //if the user is viewing the barchart
+    if(graph==2)
+    {
+      if(mouseY>y)
+      {
+        text(dlist.get((int)mouseXpos).county + ": " + (int)(array[(int)mouseXpos]),mouseX+space,mouseY-space);
+      }
+    }
+  }
+}
+
+//This method calculates the average of yearSums.
+float lineGraphAvg()
+{
+   float sum=0;
+   
+   for(float f: yearSums)
+   {
+      sum+=f; 
+   }
+   
+   float avg=sum/yearSums.length;
+   return(avg);
+}
+
 
 //This method draws a barchart to represent the sum of deaths over the seven years per county
 void drawBarChart()
 {
+    //windowsp is the actual amount of space I can use for my graph in the x and y directions
     float windowsp=width-(border*2);
+    //the width of each bar
     float bWidth=windowsp/dlist.size();
-    
+  
+   //draw the same amount of bars as the data that im using
    for(int i=0;i<dlist.size();i++)
    {
+     //x is the x position of the rect
      float x=(bWidth*i)+border;
+     //y is the y position of the rect
      float y=height-border;
-     
-     rect(x,y,bWidth,-map(countySums[i],0,maxY,0,windowsp));
+     //how tall each bar is calculated and mapped.
+     float bHeight=map(countySums[i],0,maxY,0,windowsp);
+
+     rect(x,y,bWidth,-bHeight);
+
    } 
 }
 
