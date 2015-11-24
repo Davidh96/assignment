@@ -2,7 +2,7 @@
 //David Hunt
 void setup()
 {
-  size(500,500); 
+  size(700,700); 
  
   border=width*.1;
   
@@ -14,6 +14,8 @@ void setup()
 
 //This array list is of type SortLists which will be used to hold all my data
 ArrayList<SortLists> dlist =new ArrayList<SortLists>();
+ArrayList<ArrayList<Float>> info=new ArrayList<ArrayList<Float>>();
+ArrayList<SortLists> list=new ArrayList<SortLists>();
 
 float border;
 int numYears=7;
@@ -30,6 +32,7 @@ void draw()
   
   background(255,0,0);
   stroke(0);
+  fill(255);
   
   //Used so the user can change between graphs
   if(keyPressed)
@@ -44,31 +47,46 @@ void draw()
        //barchart
         graph=2; 
      }
+     if(key=='3')
+     {
+        graph=3; 
+     }
   }
   
   //if linegraph
   if(graph==1)
   {
+      textAlign(CENTER,CENTER);
+      text("Drug & Alcohol related Deaths Each Year in Maryland (2007-2013)",width/2,border*.5);
       //get max for each year
       float max=yearMaxSum(yearSums);
       float avg=lineGraphAvg();
       drawAxis(max);
       drawLineGraph(avg);
       getdets(max,yearSums);
-      textAlign(CENTER,CENTER);
-      text("Drug & Alcohol related Deaths Each Year in Maryland (2007-2013)",width/2,border*.5);
+      
   }
   
   //if barchart
   if(graph==2)
   {
+    textAlign(CENTER,CENTER);
+    text("Drug & Alcohol related Deaths per County in Maryland (2007-2013)",width/2,border*.5);
     //get max for each county
     float max=yearMaxSum(countySums);
     drawAxis(max);
     drawBarChart();
     getdets(max,countySums);
-    textAlign(CENTER,CENTER);
-    text("Drug & Alcohol related Deaths per County in Maryland (2007-2013)",width/2,border*.5);
+    
+  }
+  
+  if(graph==3)
+  {
+     textAlign(CENTER,CENTER);
+     textSize(12);
+     text("Drug & Alcohol related Deaths per County in Maryland (2007-2013)",width/2,border*.5);
+     float max=yearMaxSum(countySums);
+     drawWordChart(max); 
   }
  
 }
@@ -87,7 +105,9 @@ void loadData()
       
       
       //Creates a SortList called perCounty. My data will be passed to the method SortLists and sort it for later use and place it in perCounty
+      //**
       SortLists perCounty= new SortLists(data);
+      SortLists County=new SortLists(data);
       //For every loop the perCounty is added to my dlist
       dlist.add(perCounty); 
    }
@@ -130,6 +150,7 @@ void drawAxis(float max)
 {
   
    float windowsp=width-border*2;
+   textSize(12);
    
     //y-axis
     line(border,border,border,height-border);
@@ -214,9 +235,11 @@ void drawLineGraph(float avg)
     float y=map(yearSums[i],0,maxY,0,windowsp);
     
     //draws the trend between current and previous points
+    fill(0);
     line((px)+border,(height-py)-border,x+border,(height-y)-border);
     
     //I draw circles at each point to make it easier to see the various points in the line graph
+    fill(255);
     ellipse((px)+border,(height-py)-border,10,10);
     
     if(i==yearSums.length-1)
@@ -243,6 +266,7 @@ void getdets(float max,float[] array)
   float xGap=windowsp/array.length;
   //space is used so the user can see the details displayed 15 pixels away from the mouse pointer
   int space=15;
+  fill(255);
   
   
   //if the x value of the mouse position is within the graph
@@ -303,9 +327,54 @@ void drawBarChart()
      float y=height-border;
      //how tall each bar is calculated and mapped.
      float bHeight=map(countySums[i],0,maxY,0,windowsp);
-
+      
+     fill(dlist.get(i).colour);
      rect(x,y,bWidth,-bHeight);
 
    } 
+}
+
+//This method displays a word chart
+void drawWordChart(float max)
+{
+  //maxTxtSize is the text size that all word will be scaled to
+  float maxTxtSize=width*.25;
+  float thetaInc;
+  //Each word is displayed equi distant from the centre and evenly along the circumfrence
+  thetaInc=TWO_PI/dlist.size();
+  float cx=width/2;
+  float cy=height/2;
+  
+  
+  for(int i=0;i<dlist.size();i++)
+  {
+    float scale=max/countySums[i];
+    float theta=i*thetaInc;
+    float x;
+    float y;
+    float r=width*.35;
+    fill(dlist.get(i).colour);
+    
+    //Text size is scaled to the maxTxtSize
+    textSize(maxTxtSize/scale);
+    
+    //this if statement is to try and ensure no overlapping of words
+    if(scale>10)
+    {
+       r=r+50;
+    }
+    x=cx+sin(theta)*r;
+    y=cy-cos(theta)*r;
+    
+    //if scale==1 then this county has the maximum amount of deaths. I want to display the largest county in the middle
+    if(scale==1)
+    {
+       x=cx;
+       y=cy;
+    }
+    
+     text(dlist.get(i).county,x,y); 
+     stroke(0,255,255);
+  }
 }
 
