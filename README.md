@@ -1,7 +1,7 @@
 # assignment
 This repository is for my oop assignment. 
 
-I will be drawing a line graph, bar chart and pie chart to represent the data.
+I will be drawing a line graph, bar chart and block chart to represent the data.
 The data held are the amount of alcohol and drug related deaths in the state of Maryland.
 The data is the amount of deaths per year in the various counties of Maryland.
 

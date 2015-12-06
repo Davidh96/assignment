@@ -1,4 +1,4 @@
-//This program displays the deaths due to alcohol and drugs in Maryland between 2007-2013. The data is displayed using a linegraph and a barchart.
+//This program displays the deaths due to alcohol and drugs in Maryland between 2007-2013. The data is displayed using a linegraph, barchart and wordchart.
 //David Hunt
 void setup()
 {
@@ -25,6 +25,7 @@ float maxY;
 
 float [] yearSums =new float[numYears];
 float[] countySums =new float[numCounties];
+float[] temp;
 int graph=1;
 
 void draw()
@@ -46,6 +47,7 @@ void draw()
      {
        //barchart
         graph=2; 
+        temp=new float[24]; 
      }
      if(key=='3')
      {
@@ -220,44 +222,6 @@ float yearMaxSum(float [] Sums)
   
 }
 
-//This method draws the line graph which represents the the sum of deaths per year
-void drawLineGraph(float avg)
-{
-  //windowsp is the actual amount of space I can use for my graph in the x and y directions
-  float windowsp=width-(border*2);
-  
-  for(int i=1;i<yearSums.length;i++)
-  {
-    //the previous x and y are mapped aswell as the x and y values. This will help fit the data into my graph
-    float px=map(i-1,0,numYears,0,windowsp+border);
-    float py=map(yearSums[i-1],0,maxY,0,windowsp);
-    float x=map(i,0,numYears,0,windowsp+border);
-    float y=map(yearSums[i],0,maxY,0,windowsp);
-    
-    //draws the trend between current and previous points
-    fill(0);
-    line((px)+border,(height-py)-border,x+border,(height-y)-border);
-    
-    //I draw circles at each point to make it easier to see the various points in the line graph
-    fill(255);
-    ellipse((px)+border,(height-py)-border,10,10);
-    
-    if(i==yearSums.length-1)
-    {
-       ellipse((x)+border,(height-y)-border,10,10);
-    }
-
-  }  
- 
-  //draw the average line
-  stroke(0,255,0);
-  float avgline=map(avg,0,maxY,0,windowsp);
-  line(border,(height-avgline)-border,width-border,(height-avgline)-border);
-  textAlign(CENTER,CENTER);
-  text("Avg:\n" + (int)avg,width-(border*.5),(height-avgline)-border);
-
-}
-
 //This methd displays details to the user
 void getdets(float max,float[] array)
 {
@@ -309,6 +273,45 @@ float lineGraphAvg()
    return(avg);
 }
 
+//GRAPHS
+
+//This method draws the line graph which represents the the sum of deaths per year
+void drawLineGraph(float avg)
+{
+  //windowsp is the actual amount of space I can use for my graph in the x and y directions
+  float windowsp=width-(border*2);
+  
+  for(int i=1;i<yearSums.length;i++)
+  {
+    //the previous x and y are mapped aswell as the x and y values. This will help fit the data into my graph
+    float px=map(i-1,0,numYears,0,windowsp+border);
+    float py=map(yearSums[i-1],0,maxY,0,windowsp);
+    float x=map(i,0,numYears,0,windowsp+border);
+    float y=map(yearSums[i],0,maxY,0,windowsp);
+    
+    //draws the trend between current and previous points
+    fill(0);
+    line((px)+border,(height-py)-border,x+border,(height-y)-border);
+    
+    //I draw circles at each point to make it easier to see the various points in the line graph
+    fill(255);
+    ellipse((px)+border,(height-py)-border,10,10);
+    
+    if(i==yearSums.length-1)
+    {
+       ellipse((x)+border,(height-y)-border,10,10);
+    }
+
+  }  
+ 
+  //draw the average line
+  stroke(0,255,0);
+  float avgline=map(avg,0,maxY,0,windowsp);
+  line(border,(height-avgline)-border,width-border,(height-avgline)-border);
+  textAlign(CENTER,CENTER);
+  text("Avg:\n" + (int)avg,width-(border*.5),(height-avgline)-border);
+
+}
 
 //This method draws a barchart to represent the sum of deaths over the seven years per county
 void drawBarChart()
@@ -317,6 +320,8 @@ void drawBarChart()
     float windowsp=width-(border*2);
     //the width of each bar
     float bWidth=windowsp/dlist.size();
+    
+    
   
    //draw the same amount of bars as the data that im using
    for(int i=0;i<dlist.size();i++)
@@ -327,10 +332,19 @@ void drawBarChart()
      float y=height-border;
      //how tall each bar is calculated and mapped.
      float bHeight=map(countySums[i],0,maxY,0,windowsp);
-      
-     fill(dlist.get(i).colour);
-     rect(x,y,bWidth,-bHeight);
 
+     fill(dlist.get(i).colour);
+     rect(x,y,bWidth,-temp[i]);
+     
+     if(temp[i]<bHeight)
+     {
+       if(countySums[i]%2==0)
+       {
+          temp[i]+=2; 
+       }
+       temp[i]+=1;
+     }
+     
    } 
 }
 

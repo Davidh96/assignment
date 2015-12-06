@@ -31,7 +31,7 @@ class SortLists
        y2012=Float.parseFloat(data[6]);
        y2013=Float.parseFloat(data[7]);
        
-       colour=color(0,random(0, 255), random(0, 255));
+       colour=color(random(0,100),random(0, 255), random(0, 255));
        
    }
  
