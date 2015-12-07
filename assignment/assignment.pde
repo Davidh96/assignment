@@ -402,8 +402,6 @@ void sortOrder()
    rect(0,height,border,-(border*.5)); 
    //asc box
    rect(width,height,-border,-(border*.5)); 
-   //reset box
-   rect(width/2-offSet,height,offSet,-offSet);
    
    fill(0);
    
@@ -411,8 +409,6 @@ void sortOrder()
    text("Desc. Order",border*.5,height-(border*.25));
    
    text("Asc. Order",width-(border*.5),height-(border*.25));
-   
-   text("R",width/2-(offSet/2),height-(offSet/2));
    
    //if mouse is over desc box
    if(mouseX>0 && mouseX<border)
@@ -609,6 +605,8 @@ void getdets(float max,float[] array)
   //if the x value of the mouse position is within the graph
   if(mouseX>border && mouseX<width-border)
   {
+    if(mouseY>border && mouseY<height-border)
+    {
      //mouseXpos is used to decide which value from yearSums to display
     float mouseXpos=(mouseX-border)/xGap;
     float y=(height-map(array[(int)mouseXpos],0,max,0,windowsp))-border; 
@@ -628,10 +626,11 @@ void getdets(float max,float[] array)
       {
         
         text(dlist.get(orderArray[(int)mouseXpos]).county + ": " + (int)(array[(int)mouseXpos]),mouseX+space,mouseY-space);
-      }//end inner if 1
+      }//end inner if 2
       
-    }//end inner if
+    }//end inner if 1
     
+    }//end inner if
   }//end if
   
   //if mouseY value is down where all the chart details are
